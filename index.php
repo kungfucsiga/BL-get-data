@@ -31,7 +31,7 @@ set_time_limit(0);
 /** Error reporting */
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
-//ini_set('memory_limit', '-1');
+ini_set('memory_limit', '-1');
 
 date_default_timezone_set('Europe/Budapest');
 
@@ -67,6 +67,7 @@ $objPHPExcel->setActiveSheetIndex(0)
             ->setCellValue('I1', 'Content');
 
 $counter = 1;
+$related_arr = array();
 foreach($sheetData as $data) {
 
     if ($counter < 50000) {
@@ -100,6 +101,12 @@ foreach($sheetData as $data) {
             if ($is_there_S) foreach($html->find('.group-name') as $element) $title = strip_tags ($element->outertext);
             else foreach($html->find('.group-name') as $element) $title = strip_tags ($element->outertext);
             
+            $created = "";
+            $type = "";
+            $members = "";
+            $owner = "";
+            $website = "";
+            
             foreach($html->find('.anet-navbox ul li') as $li_element) {
                 
                 $li = trim( strip_tags($li_element));
@@ -119,6 +126,7 @@ foreach($sheetData as $data) {
                 if ($key == 'Website') $website = $value;
             }
             
+            $content = "";
             foreach($html->find('#content .groups-upsell-SEO') as $element) $content = strip_tags ($element->outertext);
              
             // Add some data
@@ -135,16 +143,47 @@ foreach($sheetData as $data) {
 
             // Set active sheet index to the first sheet, so Excel opens this as the first sheet
             $objPHPExcel->setActiveSheetIndex(0);
+            
+            
+            // tartozik-e hozza related
+            $related = false;
+            foreach($html->find('.browsemaps ul li a') as $element) {
+                
+                $related = true;
+                $old_href = $element->href;
+                
+                $anetid = substr($old_href, strpos($old_href, 'anetid='));
+                $anetid = substr($anetid, 7,6);
+                $new_href = 'http://www.linkedin.com/groups?gid='.$anetid;
+                
+                if ( !in_array($new_href, $related_arr)) {
+                    
+                    $related_arr[] = $new_href;
+                }
+            }
         }
     }
 }
 
+
+
+$counter += 10;
+foreach ($related_arr as $array_element) {
+    
+    $new_href = $array_element;
+    $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('B'.$counter, $new_href);
+
+    
+    $counter++;
+}
+
+
 // Redirect output to a client’s web browser (Excel5)
 header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment;filename="01simple.xls"');
+header('Content-Disposition: attachment;filename="mesi_altal.xls"');
 header('Cache-Control: max-age=0');
 
 $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
 $objWriter->save('php://output');
-            
             
