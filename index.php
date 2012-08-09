@@ -98,6 +98,7 @@ foreach($sheetData as $data) {
             
             $html = file_get_html($link);
             
+            $title = "";
             if ($is_there_S) foreach($html->find('.group-name') as $element) $title = strip_tags ($element->outertext);
             else foreach($html->find('.group-name') as $element) $title = strip_tags ($element->outertext);
             
@@ -181,7 +182,7 @@ foreach ($related_arr as $array_element) {
 
 // Redirect output to a client’s web browser (Excel5)
 header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment;filename="mesi_altal.xls"');
+header('Content-Disposition: attachment;filename="related_sheet_8.xls"');
 header('Cache-Control: max-age=0');
 
 $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
